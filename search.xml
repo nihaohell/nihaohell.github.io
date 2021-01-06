@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>apache搭建https</title>
+    <url>/2021/01/06/apache%E6%90%AD%E5%BB%BAhttps/</url>
+    <content><![CDATA[<p>主要是根据阿里安装ssl证书的步骤走的<br><a href="https://help.aliyun.com/document_detail/98727.html">https://help.aliyun.com/document_detail/98727.html</a><br>前提条件</p>
+<p>1.您的Apache服务器上已经开启了443端口（HTTPS服务的默认端口）。(这个需要在后台对应域名打开443端口)<br>2.您的Apache服务器上已安装了mod_ssl.so模块（启用SSL功能）。(我之前是没有安装过的 要用 yum install -y mod_ssl 来安装)<br>3.本文档证书名称以domain name为示例，例如：证书文件名称为domain name_public.crt，证书链文件名称为domain name_chain.crt，证书密钥文件名称为domain name.key。<br>4.申请证书时如果未选择系统自动创建CSR，证书下载压缩包中将不包含.key文件。</p>
+<p>上面3.4了解下 我用的文件是pfx文件格式的,还要用openssl 去生成.crt,.key文件</p>
+<p>查看证书库 终端进入存放.pfx的文件 输入后enter会出现输入密码的提示<br>openssl pkcs12 -in test.pfx -nokeys -clcerts</p>
+<p>提取密钥</p>
+<p>openssl pkcs12 -in test.pfx -nocerts -nodes -out test.key</p>
+<p>提取pub证书</p>
+<p>openssl pkcs12 -in test.pfx -clcerts -nokeys -out test.crt</p>
+<p>提取chain证书(CA)<br>openssl pkcs12 -in test.pfx -nokeys -cacerts -out test_chain.crt<br>(注意生成chain证书的时候会出现 0kb 的情况 ,我遇到了是使用 <a href="https://myssl.com/chain_download.html">https://myssl.com/chain_download.html</a> 这个连接去下载的,因为我们申请的证书是*开头的所以下载的是一样的 不知道是不是适合其他人)<br>拓展:<br>提取公钥<br>openssl rsa -in test.key -pubout -out test.rsa.pub</p>
+<p>提取私钥<br>openssl rsa -in test.key -out test.rsa.key</p>
+<p>然后将生成的文件上传到服务器apache安装目录,最好新建一个cert文件夹里面</p>
+<p>我用yum安装了ssl_modle 在httpd/conf.d里面可以找到ssl.conf<br>然后编辑<br>在最后加入<br>&lt;VirtualHost *:443&gt;<br>    ServerName   #修改为申请证书时绑定的域名注意域名前不要加* 要是有多个站点就在复制一遍</p>
+<pre><code>DocumentRoot  /data/www/hbappserver/public   #要是有多个站点就在复制一遍,把DocumentRoot        
+SSLEngine on   
+SSLProtocol all -SSLv2 -SSLv3 # 添加SSL协议支持协议，去掉不安全的协议。
+SSLCipherSuite HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM   # 修改加密套件。
+SSLHonorCipherOrder on
+SSLCertificateFile cert/name1_public.crt   # 将domain name1_public.crt替换成您证书文件名。
+SSLCertificateKeyFile cert/name1.key   # 将domain name1.key替换成您证书的密钥文件名。
+SSLCertificateChainFile cert/name1_chain.crt  # 将domain name1_chain.crt替换成您证书的密钥文件名；证书链开头如果有#字符，请删除。</code></pre>
+</VirtualHost>
+
+<p>有的会出现让改 httpd/conf/httpd.conf的<br>#LoadModule ssl_module modules/mod_ssl.so  #删除行首的配置语句注释符号“#”加载mod_ssl.so模块启用SSL服务，Apache默认是不启用该模块的。<br>#Include conf/extra/httpd-ssl.conf  #删除行首的配置语句注释符号“#”。  </p>
+<p>这个我的httpd.conf里面没有,开始添加上了会报错,后来直接去掉就好了,可能版本的问题</p>
+<p>以上改完重启下apache<br>我习惯用 service httpd restart 重启<br>重启后若是报错 就用 service httpd status 查看出错的地方</p>
+<p>若是要求重定向 请在 httpd/conf/httpd.conf 的站点 &lt;VirtualHost *:80&gt; </VirtualHost>中间加入<br>RewriteEngine on<br>RewriteCond %{SERVER_PORT} !^443$<br>RewriteRule ^(.*)$ https://%{SERVER_NAME}$1 [L,R]</p>
+<p>要是输入https+站点出现信任问题请参考上面说的 2 在服务器打开站点的443端口白名单</p>
+]]></content>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2021/01/05/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
