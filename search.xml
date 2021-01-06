@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>apache搭建https</title>
+    <title>apache安装ssl证书</title>
     <url>/2021/01/06/apache%E6%90%AD%E5%BB%BAhttps/</url>
     <content><![CDATA[<p>主要是根据阿里安装ssl证书的步骤走的<br><a href="https://help.aliyun.com/document_detail/98727.html">https://help.aliyun.com/document_detail/98727.html</a><br>前提条件</p>
 <p>1.您的Apache服务器上已经开启了443端口（HTTPS服务的默认端口）。(这个需要在后台对应域名打开443端口)<br>2.您的Apache服务器上已安装了mod_ssl.so模块（启用SSL功能）。(我之前是没有安装过的 要用 yum install -y mod_ssl 来安装)<br>3.本文档证书名称以domain name为示例，例如：证书文件名称为domain name_public.crt，证书链文件名称为domain name_chain.crt，证书密钥文件名称为domain name.key。<br>4.申请证书时如果未选择系统自动创建CSR，证书下载压缩包中将不包含.key文件。</p>
